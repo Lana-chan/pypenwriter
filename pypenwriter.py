@@ -47,6 +47,10 @@ def SVG_to_plotter(draw, filename, scale):
 	plot_scale = scale
 	scale_side = float(viewbox[2])
 	point_scale = 1 / scale_side * plot_scale
+	halfway_down = int(float(viewbox[3]) * point_scale / 2)
+
+	draw.move(0,-halfway_down)
+	draw.sethome()
 
 	groups = doc.getElementsByTagName('g')
 	for group in groups:
@@ -54,7 +58,7 @@ def SVG_to_plotter(draw, filename, scale):
 		for element in elements:
 			if element.nodeName == 'polygon' or \
 			   element.nodeName == 'polyline' or \
-				 element.nodeName == 'line':
+			   element.nodeName == 'line':
 
 				if element.hasAttribute('style'):
 					style = element.getAttribute('style')
@@ -82,7 +86,7 @@ def SVG_to_plotter(draw, filename, scale):
 						if ',' in point:
 							x,y = point.split(',')
 							x = int(float(x) * point_scale)
-							y = -int(float(y) * point_scale)
+							y = halfway_down-int(float(y) * point_scale)
 							if point_idx == 0:
 								firstx = x
 								firsty = y
@@ -92,12 +96,12 @@ def SVG_to_plotter(draw, filename, scale):
 							point_idx += 1
 					if element.tagName == 'polygon':
 						draw.line(firstx,firsty)
-						
+
 				elif element.tagName == 'line':
 					x1 = int(float(element.getAttribute('x1')) * point_scale)
-					y1 = -int(float(element.getAttribute('y1')) * point_scale)
+					y1 = halfway_down-int(float(element.getAttribute('y1')) * point_scale)
 					x2 = int(float(element.getAttribute('x2')) * point_scale)
-					y2 = -int(float(element.getAttribute('y2')) * point_scale)
+					y2 = halfway_down-int(float(element.getAttribute('y2')) * point_scale)
 					draw.move(x1,y1)
 					draw.line(x2,y2)
 
