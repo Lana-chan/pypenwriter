@@ -14,28 +14,45 @@ class PlotterDrawing:
 	BLUE = 3
 
 	def __init__(self):
-		self.output = bytearray(b'\x1bc\rI\r')
+		self.output = b'\x1bc\rI\r'
+		self.lastcommand = ""
+		self.thiscommand = ""
+		self.lastcolor = -1
 
 	def append(self, cmd):
-		self.output.extend(bytes(cmd.encode('ascii')))
+		if self.lastcommand == "D" and self.thiscommand == "D":
+			self.output = self.output[:-1]
+		self.output += bytes(cmd.encode('ascii')) + b'\r'
+		self.lastcommand = self.thiscommand
 
 	def color(self, color):
-		self.append(f'C{color}\r')
+		if self.lastcolor != color:
+			self.thiscommand = "C"
+			self.append(f'C{color}')
+			self.lastcolor = color
 
 	def move(self, x, y):
-		self.append(f'M{round(x)},{round(y)}\r')
+		self.thiscommand = "M"
+		self.append(f'M{round(x)},{round(y)}')
 
 	def line(self, x, y):
-		self.append(f'D{round(x)},{round(y)}\r')
+		self.thiscommand = "D"
+		if self.lastcommand == "D":
+			self.append(f',{round(x)},{round(y)}')
+		else:
+			self.append(f'D{round(x)},{round(y)}')
 
 	def circle(self, radius):
-		self.append(f'Y{round(radius)}\r')
+		self.thiscommand = "Y"
+		self.append(f'Y{round(radius)}')
 
 	def sethome(self):
-		self.append(f'I\r')
+		self.thiscommand = "I"
+		self.append(f'I')
 
 	def home(self):
-		self.append(f'H\r')
+		self.thiscommand = "H"
+		self.append(f'H')
 
 def usage():
 	print(f"usage: {sys.argv[0]} <input.svg> <com-port> [<width-in-steps>] [<debug>]")
