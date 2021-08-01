@@ -146,9 +146,13 @@ if __name__ == "__main__":
 
 	if len(sys.argv) < 5:
 		with serial.Serial(com_port,2400,rtscts=True) as ser:
-			for line in draw.output.split(b'\r'):
-				ser.write(line + b':\r')
+			commands = draw.output.split(b'\r')
+			idx = 0
+			for command in commands:
+				ser.write(command + b':\r')
 				ser.flush()
+				idx += 1;
+				print(f"\rprogress: {int(idx / len(commands) * 100)}%", end="")
 			ser.close()
 	else:
 		print(draw.output)
