@@ -71,6 +71,20 @@ def SVG_to_plotter(draw, filename, scale):
 
 	groups = doc.getElementsByTagName('g')
 	for group in groups:
+		if group.hasAttribute('stroke'):
+			color = group.getAttribute('stroke')
+			
+			if color == "#ff0000":
+				group.color = draw.RED
+			if color == "#00ff00":
+				group.color = draw.GREEN
+			if color == "#0000ff":
+				group.color = draw.BLUE
+			if color == "#000000":
+				group.color = draw.BLACK
+		else:
+			group.color = draw.BLACK
+
 		elements = group.childNodes
 		for element in elements:
 			if element.nodeName == 'polygon' or \
@@ -90,7 +104,7 @@ def SVG_to_plotter(draw, filename, scale):
 					if color == "stroke:#000000":
 						draw.color(draw.BLACK)
 				else:
-					draw.color(draw.BLACK)
+					draw.color(group.color)
 
 				if element.tagName == 'polygon' or \
 				   element.tagName == 'polyline':
