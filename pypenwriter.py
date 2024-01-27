@@ -17,6 +17,7 @@ class PlotterDrawing:
 		self.output = b'\x1bc\rI\r'
 		self.lastcommand = ""
 		self.thiscommand = ""
+		self.lastpos = (None,None)
 		self.lastcolor = -1
 
 	def append(self, cmd):
@@ -34,6 +35,7 @@ class PlotterDrawing:
 	def move(self, x, y):
 		self.thiscommand = "M"
 		self.append(f'M{round(x)},{round(y)}')
+		self.lastpos = (round(x),round(y))
 
 	def line(self, x, y):
 		self.thiscommand = "D"
@@ -41,6 +43,7 @@ class PlotterDrawing:
 			self.append(f',{round(x)},{round(y)}')
 		else:
 			self.append(f'D{round(x)},{round(y)}')
+		self.lastpos = (round(x),round(y))
 
 	def circle(self, radius):
 		self.thiscommand = "Y"
@@ -54,6 +57,9 @@ class PlotterDrawing:
 		self.thiscommand = "H"
 		self.append(f'H')
 
+	def islastpos(self, x, y):
+		return (round(x),round(y)) == self.lastpos
+
 def usage():
 	print(f"usage: {sys.argv[0]} <input.svg> <com-port> [<width-in-steps>] [<debug>]")
 	exit(0)
@@ -66,7 +72,7 @@ def SVG_to_plotter(draw, filename, scale):
 	point_scale = 1 / scale_side * plot_scale
 	halfway_down = int(float(viewbox[3]) * point_scale / 2)
 
-	draw.move(0,-halfway_down)
+	draw.move(-60,-halfway_down)
 	draw.sethome()
 
 	groups = doc.getElementsByTagName('g')
@@ -133,7 +139,8 @@ def SVG_to_plotter(draw, filename, scale):
 					y1 = halfway_down-int(float(element.getAttribute('y1')) * point_scale)
 					x2 = int(float(element.getAttribute('x2')) * point_scale)
 					y2 = halfway_down-int(float(element.getAttribute('y2')) * point_scale)
-					draw.move(x1,y1)
+					if not draw.islastpos(x1,y1):
+						draw.move(x1,y1)
 					draw.line(x2,y2)
 
 	draw.home()
